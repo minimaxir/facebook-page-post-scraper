@@ -35,7 +35,7 @@ def getFacebookPageFeedData(page_id, access_token, num_statuses):
     
     # construct the URL string
     base = "https://graph.facebook.com/v2.6/"
-    node = "/" + page_id + "/feed" 
+    node = "/" + page_id + "/posts" 
     parameters = "/?fields=message,link,created_time,type,name,id,comments.limit(1).summary(true),shares,reactions.limit(1).summary(true)&limit=%s&access_token=%s" % (num_statuses, access_token) # changed
     url = base + node + parameters
     
