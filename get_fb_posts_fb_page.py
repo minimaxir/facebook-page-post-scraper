@@ -4,9 +4,9 @@ import datetime
 import csv
 import time
 
-app_id = <FILL IN>
-app_secret = <FILL IN> # DO NOT SHARE WITH ANYONE!
-page_id = "cnn"
+app_id = "<FILL IN>"
+app_secret = "<FILL IN>" # DO NOT SHARE WITH ANYONE!
+page_id = "nytimes"
 
 access_token = app_id + "|" + app_secret
 
@@ -26,18 +26,40 @@ def request_until_succeed(url):
 
     return response.read()
 
-
-# Needed to write tricky unicode correctly to csv; not present in tutorial
+# Needed to write tricky unicode correctly to csv
 def unicode_normalize(text):
 	return text.translate({ 0x2018:0x27, 0x2019:0x27, 0x201C:0x22, 0x201D:0x22, 0xa0:0x20 }).encode('utf-8')
 
 def getFacebookPageFeedData(page_id, access_token, num_statuses):
     
-    # construct the URL string
-    base = "https://graph.facebook.com/v2.6/"
-    node = "/" + page_id + "/posts" 
-    parameters = "/?fields=message,link,created_time,type,name,id,comments.limit(1).summary(true),shares,reactions.limit(1).summary(true)&limit=%s&access_token=%s" % (num_statuses, access_token) # changed
-    url = base + node + parameters
+    # Construct the URL string; see http://stackoverflow.com/a/37239851 for Reactions parameters
+    base = "https://graph.facebook.com/v2.6"
+    node = "/%s/posts" % page_id 
+    fields = "/?fields=message,link,created_time,type,name,id,comments.limit(0).summary(true),shares,reactions.limit(0).summary(true)"
+    parameters = "&limit=%s&access_token=%s" % (num_statuses, access_token)
+    url = base + node + fields + parameters
+    
+    # retrieve data
+    data = json.loads(request_until_succeed(url))
+    
+    return data
+    
+def getReactionsForStatus(status_id, access_token):
+
+	# See http://stackoverflow.com/a/37239851 for Reactions parameters
+	# Reactions are only accessable at a single-post endpoint
+	
+    base = "https://graph.facebook.com/v2.6"
+    node = "/%s" % status_id
+    reactions = "/?fields=" \
+    				"reactions.type(LIKE).limit(0).summary(total_count).as(like)" \
+    				",reactions.type(LOVE).limit(0).summary(total_count).as(love)" \
+    				",reactions.type(WOW).limit(0).summary(total_count).as(wow)" \
+    				",reactions.type(HAHA).limit(0).summary(total_count).as(haha)" \
+    				",reactions.type(SAD).limit(0).summary(total_count).as(sad)" \
+    				",reactions.type(ANGRY).limit(0).summary(total_count).as(angry)"
+    parameters = "&access_token=%s" % access_token
+    url = base + node + reactions + parameters
     
     # retrieve data
     data = json.loads(request_until_succeed(url))
@@ -45,7 +67,7 @@ def getFacebookPageFeedData(page_id, access_token, num_statuses):
     return data
     
 
-def processFacebookPageFeedStatus(status):
+def processFacebookPageFeedStatus(status, access_token):
     
     # The status is now a Python dictionary, so for top-level items,
     # we can simply call the key.
@@ -58,7 +80,6 @@ def processFacebookPageFeedStatus(status):
     link_name = '' if 'name' not in status.keys() else unicode_normalize(status['name'])
     status_type = status['type']
     status_link = '' if 'link' not in status.keys() else unicode_normalize(status['link'])
-    
     
     # Time needs special care since a) it's in UTC and
     # b) it's not easy to use in statistical programs.
@@ -73,15 +94,30 @@ def processFacebookPageFeedStatus(status):
     num_comments = 0 if 'comments' not in status.keys() else status['comments']['summary']['total_count']
     num_shares = 0 if 'shares' not in status.keys() else status['shares']['count']
     
+    # Counts of each reaction separately; good for sentiment
+    # Only check for reactions if past date of implementation: http://newsroom.fb.com/news/2016/02/reactions-now-available-globally/
+    
+    reactions = getReactionsForStatus(status_id, access_token) if status_published > '2016-02-24 00:00:00' else {}
+    
+    num_likes = 0 if 'like' not in reactions.keys() else reactions['like']['summary']['total_count']
+    num_loves = 0 if 'love' not in reactions.keys() else reactions['love']['summary']['total_count']
+    num_wows = 0 if 'wow' not in reactions.keys() else reactions['wow']['summary']['total_count']
+    num_hahas = 0 if 'haha' not in reactions.keys() else reactions['haha']['summary']['total_count']
+    num_sads = 0 if 'sad' not in reactions.keys() else reactions['sad']['summary']['total_count']
+    num_angrys = 0 if 'angry' not in reactions.keys() else reactions['angry']['summary']['total_count']
+    
     # return a tuple of all processed data
+    
     return (status_id, status_message, link_name, status_type, status_link,
-           status_published, num_reactions, num_comments, num_shares)
+           status_published, num_reactions, num_comments, num_shares,  num_likes,
+           num_loves, num_wows, num_hahas, num_sads, num_angrys)
 
 def scrapeFacebookPageFeedStatus(page_id, access_token):
     with open('%s_facebook_statuses.csv' % page_id, 'wb') as file:
         w = csv.writer(file)
         w.writerow(["status_id", "status_message", "link_name", "status_type", "status_link",
-           "status_published", "num_reactions", "num_comments", "num_shares"])
+           "status_published", "num_reactions", "num_comments", "num_shares", "num_likes",
+           "num_loves", "num_wows", "num_hahas", "num_sads", "num_angrys"])
         
         has_next_page = True
         num_processed = 0   # keep a count on how many we've processed
@@ -93,11 +129,11 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
         
         while has_next_page:
             for status in statuses['data']:
-                w.writerow(processFacebookPageFeedStatus(status))
+                w.writerow(processFacebookPageFeedStatus(status, access_token))
                 
                 # output progress occasionally to make sure code is not stalling
                 num_processed += 1
-                if num_processed % 1000 == 0:
+                if num_processed % 100 == 0:
                     print "%s Statuses Processed: %s" % (num_processed, datetime.datetime.now())
 					
             # if there is no next page, we're done.
