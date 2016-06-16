@@ -6,7 +6,7 @@ import time
 
 app_id = "<FILL IN>"
 app_secret = "<FILL IN>" # DO NOT SHARE WITH ANYONE!
-page_id = "cnn"
+group_id = "759985267390294"
 
 access_token = app_id + "|" + app_secret
 
@@ -30,12 +30,12 @@ def request_until_succeed(url):
 def unicode_normalize(text):
 	return text.translate({ 0x2018:0x27, 0x2019:0x27, 0x201C:0x22, 0x201D:0x22, 0xa0:0x20 }).encode('utf-8')
 
-def getFacebookPageFeedData(page_id, access_token, num_statuses):
+def getFacebookPageFeedData(group_id, access_token, num_statuses):
     
     # Construct the URL string; see http://stackoverflow.com/a/37239851 for Reactions parameters
     base = "https://graph.facebook.com/v2.6"
-    node = "/%s/posts" % page_id 
-    fields = "/?fields=message,link,created_time,type,name,id,comments.limit(0).summary(true),shares,reactions.limit(0).summary(true)"
+    node = "/%s/feed" % group_id 
+    fields = "/?fields=message,link,created_time,type,name,id,comments.limit(0).summary(true),shares,reactions.limit(0).summary(true),from"
     parameters = "&limit=%s&access_token=%s" % (num_statuses, access_token)
     url = base + node + fields + parameters
     
@@ -80,6 +80,7 @@ def processFacebookPageFeedStatus(status, access_token):
     link_name = '' if 'name' not in status.keys() else unicode_normalize(status['name'])
     status_type = status['type']
     status_link = '' if 'link' not in status.keys() else unicode_normalize(status['link'])
+    status_author = unicode_normalize(status['from']['name'])
     
     # Time needs special care since a) it's in UTC and
     # b) it's not easy to use in statistical programs.
@@ -108,14 +109,14 @@ def processFacebookPageFeedStatus(status, access_token):
     
     # return a tuple of all processed data
     
-    return (status_id, status_message, link_name, status_type, status_link,
+    return (status_id, status_message, status_author, link_name, status_type, status_link,
            status_published, num_reactions, num_comments, num_shares,  num_likes,
            num_loves, num_wows, num_hahas, num_sads, num_angrys)
 
-def scrapeFacebookPageFeedStatus(page_id, access_token):
-    with open('%s_facebook_statuses.csv' % page_id, 'wb') as file:
+def scrapeFacebookPageFeedStatus(group_id, access_token):
+    with open('%s_facebook_statuses.csv' % group_id, 'wb') as file:
         w = csv.writer(file)
-        w.writerow(["status_id", "status_message", "link_name", "status_type", "status_link",
+        w.writerow(["status_id", "status_message", "status_author", "link_name", "status_type", "status_link",
            "status_published", "num_reactions", "num_comments", "num_shares", "num_likes",
            "num_loves", "num_wows", "num_hahas", "num_sads", "num_angrys"])
         
@@ -123,9 +124,9 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
         num_processed = 0   # keep a count on how many we've processed
         scrape_starttime = datetime.datetime.now()
         
-        print "Scraping %s Facebook Page: %s\n" % (page_id, scrape_starttime)
+        print "Scraping %s Facebook Page: %s\n" % (group_id, scrape_starttime)
         
-        statuses = getFacebookPageFeedData(page_id, access_token, 100)
+        statuses = getFacebookPageFeedData(group_id, access_token, 100)
         
         while has_next_page:
             for status in statuses['data']:
@@ -147,7 +148,7 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
 
 
 if __name__ == '__main__':
-	scrapeFacebookPageFeedStatus(page_id, access_token)
+	scrapeFacebookPageFeedStatus(group_id, access_token)
 
 
 # The CSV can be opened in all major statistical programs. Have fun! :)

@@ -34,36 +34,35 @@ theme_custom <- function() {theme_bw(base_size = 8) +
                                    axis.title.y = element_text(family=fontTitle, size=8, vjust=1.5),
                                    panel.border = element_rect(color="#cccccc"),
                                    text = element_text(color = "#1a1a1a", family=fontFamily),
-                                   plot.margin = unit(c(0.25,0.1,0.30,0.35), "cm"),
+                                   plot.margin = unit(c(0.25,0.1,0.1,0.35), "cm"),
                                    plot.title = element_text(family=fontTitle, size=9, vjust=1))                          
 }
 
-create_watermark <- function(source = '', filename = '') {
-	
-symbols <- c('','', '', '')
-symbol <- symbols[strtoi(substr(digest(filename),1,6), base=36) %% length(symbols)]
-if (length(symbol)==0) symbol <- symbols[1]
+create_watermark <- function(source = '', filename = '', dark=F) {
 
 bg_white = "#FFFFFF"
 bg_text = '#969696'
 
-watermark <- ggplot(aes(x,y), data=data.frame(x=c(0.5), y=c(0.5))) + geom_point(color = "transparent") +
-geom_text(x=0, y=0.9, label="By Max Woolf — minimaxir.com", family="Source Sans Pro", color=bg_text, size=1.75, hjust=0) +
+if (dark) {
+	bg_white = "#000000"
+	bg_text = '#666666'
+}
 
-geom_text(x=5, y=0.9, label="Made using R and ggplot2", family="Source Sans Pro", color=bg_text, size=1.75) +
-#geom_text(x=0, y=1.01, label = symbol, family = 'FontAwesome', color=bg_text, size=2) +
-#geom_text(x=8, y=1, label = "via FiveThirtyEight", family="M+ 1m light", color="white") +
+watermark <- ggplot(aes(x,y), data=data.frame(x=c(0.5), y=c(0.5))) + geom_point(color = "transparent") +
+geom_text(x=0, y=1.25, label="By Max Woolf — minimaxir.com", family="Source Sans Pro", color=bg_text, size=1.75, hjust=0) +
+
+geom_text(x=5, y=1.25, label="Made using R and ggplot2", family="Source Sans Pro", color=bg_text, size=1.75) +
 scale_x_continuous(limits=c(0,10)) +
 scale_y_continuous(limits=c(0.5,1.5)) +
 annotate("segment", x = 0, xend = 10, y=1.5, yend=1.5, color=bg_text, size=0.1) +
 theme_bw() +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position = "none",
          panel.border = element_blank(), axis.text.x = element_blank(), axis.text.y = element_blank(), axis.title.x = element_blank(), axis.title.y = element_blank(),
-         axis.ticks = element_blank(), plot.margin = unit(c(0.1,0,-0.4,0), "cm")) +
+         axis.ticks = element_blank(), plot.margin = unit(c(0.0,0,-0.4,0), "cm")) +
 theme(plot.background=element_rect(fill=bg_white, color=bg_white),panel.background=element_rect(fill=bg_white, color=bg_white)) +
 scale_color_manual(values=bg_text)
 
-if (nchar(source) > 0) {watermark <- watermark + geom_text(x=10, y=0.9, label=paste("Data via",source), family="Source Sans Pro", color=bg_text, size=1.75, hjust=1)}
+if (nchar(source) > 0) {watermark <- watermark + geom_text(x=10, y=1.25, label=paste("Data via",source), family="Source Sans Pro", color=bg_text, size=1.75, hjust=1)}
 
 return (watermark)
 }
@@ -112,14 +111,17 @@ web_plot <- function(a, b) {
      print(b, vp = subplot(1, 2))
  }
  
-max_save <- function(plot1, filename, source = '', pdf = FALSE, w=4, h=3, tall=F) {
+max_save <- function(plot1, filename, source = '', pdf = FALSE, w=4, h=3, tall=F, dark=F, bg_overide=NA) {
 	png(paste(filename,"png",sep="."),res=300,units="in",width=w,height=h)
-ifelse(tall,tallweb_plot(plot1,create_watermark(source, filename)),web_plot(plot1,create_watermark(source, filename)))
+plot.new()
+#if (!is.na(bg_overide)) {par(bg = bg_overide)}
+ifelse(tall,tallweb_plot(plot1,create_watermark(source, filename, dark)),web_plot(plot1,create_watermark(source, filename, dark)))
 dev.off()
 
 if (pdf) {
 quartz(width=w,height=h,dpi=144)
-web_plot(plot1,create_watermark(source, filename))
+#if (!is.na(bg_overide)) {par(bg = bg_overide)}
+web_plot(plot1,create_watermark(source, filename, dark))
 quartz.save(paste(filename,"pdf",sep="."), type = "pdf", device = dev.cur())
 }
 }
@@ -144,7 +146,7 @@ fte_theme <- function (palate_color = "Greys") {
   #color.title = "#2c3e50"
   
   font.title <- "Source Sans Pro"
-  font.axis <- "Open Sans Condensed Light"
+  font.axis <- "Open Sans Condensed Bold"
   #font.axis <- "M+ 1m regular"
   #font.title <- "Arial"
   #font.axis <- "Arial"
