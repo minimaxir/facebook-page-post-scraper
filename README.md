@@ -4,11 +4,9 @@
 
 A tool for gathering *all* the posts of a Facebook Page (or Open Facebook Group) and related metadata, including post message, post links, and counts of each reaction on the post. All this data is exported as a CSV, able to be imported into any data analysis program like Excel.
 
-The purpose of the script is to gather Facebook data for semantic analysis, which is greatly helped by the presence of high-quality Reaction data. Here are a couple quick examples of potential Facebook Reaction data visualizations using data from CNN's Facebook page and the NYTimes Facebook page.
+The purpose of the script is to gather Facebook data for semantic analysis, which is greatly helped by the presence of high-quality Reaction data. Here's quick examples of a potential Facebook Reaction data visualization using data from [CNN's Facebook page](https://www.facebook.com/cnn/):
 
 ![](/examples/reaction-example-2.png)
-
-![](/examples/reaction-example-3.png)
 
 ## Usage
 
@@ -16,7 +14,7 @@ The Page data scraper is implemented as a Python 2.7 script in `get_fb_posts_fb_
 
 Example CSVs for CNN, NYTimes, and BuzzFeed data are not included in this repository due to size, but you can download [CNN data here](https://dl.dropboxusercontent.com/u/2017402/cnn_facebook_statuses.csv.zip) [2.7MB ZIP], [NYTimes data here](https://dl.dropboxusercontent.com/u/2017402/nytimes_facebook_statuses.csv.zip) [4.9MB ZIP], and [BuzzFeed data here](https://dl.dropboxusercontent.com/u/2017402/buzzfeed_facebook_statuses.csv.zip) [2.1MB ZIP].
 
-To get data from an Open Group, use the `get_fb_posts_fb_page.py` script with the App ID and App Secret filled in the same way. However, the `group_id` is a *numeric ID*: to get the ID, do a View Source on the Group Page, search for "entity_id", and use the number to the right of that field. For example, the group_id of Hackathon Hackers is 759985267390294
+To get data from an Open Group, use the `get_fb_posts_fb_group.py` script with the App ID and App Secret filled in the same way. However, the `group_id` is a *numeric ID*: to get the ID, do a View Source on the Group Page, search for "entity_id", and use the number to the right of that field. For example, the `group_id` of [Hackathon Hackers](https://www.facebook.com/groups/hackathonhackers/) is 759985267390294.
 
 ![](/examples/entity.png)
 
@@ -24,9 +22,9 @@ You can download example data for [Hackathon Hackers here](https://dl.dropboxuse
 
 ## Privacy
 
-This scraper can only scrape public Facebook data which is available to anyone, even those who are not logged into Facebook. No personally-identifiable data is collected in the Page variant; the Group variant does collect the name of the author of the post, but that data is also public to non-logged-in users. Additionally, the script only uses officially-documented Facebook APIs without bypassing any rate-limits.
+This scraper can only scrape public Facebook data which is available to anyone, even those who are not logged into Facebook. No personally-identifiable data is collected in the Page variant; the Group variant does collect the name of the author of the post, but that data is also public to non-logged-in users. Additionally, the script only uses officially-documented Facebook API endpoints without circumventing any rate-limits.
 
-Note that this script, and any variant of the script, *cannot* be used to scrape data user profiles. (and the Facebook API specifically disallows this use case!)
+Note that this script, and any variant of this script, *cannot* be used to scrape data user profiles. (and the Facebook API specifically disallows this use case!)
 
 ## Maintainer
 
