@@ -90,23 +90,28 @@ def processFacebookPageFeedStatus(status, access_token):
     
     # Nested items require chaining dictionary keys.
     
-    num_reactions = 0 if 'reactions' not in status.keys() else status['reactions']['summary']['total_count']
-    num_comments = 0 if 'comments' not in status.keys() else status['comments']['summary']['total_count']
-    num_shares = 0 if 'shares' not in status.keys() else status['shares']['count']
+    num_reactions = 0 if 'reactions' not in status else status['reactions']['summary']['total_count']
+    num_comments = 0 if 'comments' not in status else status['comments']['summary']['total_count']
+    num_shares = 0 if 'shares' not in status else status['shares']['count']
     
     # Counts of each reaction separately; good for sentiment
     # Only check for reactions if past date of implementation: http://newsroom.fb.com/news/2016/02/reactions-now-available-globally/
     
     reactions = getReactionsForStatus(status_id, access_token) if status_published > '2016-02-24 00:00:00' else {}
     
-    num_likes = 0 if 'like' not in reactions.keys() else reactions['like']['summary']['total_count']
-    num_loves = 0 if 'love' not in reactions.keys() else reactions['love']['summary']['total_count']
-    num_wows = 0 if 'wow' not in reactions.keys() else reactions['wow']['summary']['total_count']
-    num_hahas = 0 if 'haha' not in reactions.keys() else reactions['haha']['summary']['total_count']
-    num_sads = 0 if 'sad' not in reactions.keys() else reactions['sad']['summary']['total_count']
-    num_angrys = 0 if 'angry' not in reactions.keys() else reactions['angry']['summary']['total_count']
+    num_likes = 0 if 'like' not in reactions else reactions['like']['summary']['total_count']
     
-    # return a tuple of all processed data
+    # Special case: Set number of Likes to Number of reactions for pre-reaction statuses
+    
+    num_likes = num_reactions if status_published < '2016-02-24 00:00:00' else num_likes
+    
+    num_loves = 0 if 'love' not in reactions else reactions['love']['summary']['total_count']
+    num_wows = 0 if 'wow' not in reactions else reactions['wow']['summary']['total_count']
+    num_hahas = 0 if 'haha' not in reactions else reactions['haha']['summary']['total_count']
+    num_sads = 0 if 'sad' not in reactions else reactions['sad']['summary']['total_count']
+    num_angrys = 0 if 'angry' not in reactions else reactions['angry']['summary']['total_count']
+    
+    # Return a tuple of all processed data
     
     return (status_id, status_message, link_name, status_type, status_link,
            status_published, num_reactions, num_comments, num_shares,  num_likes,
@@ -129,7 +134,10 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
         
         while has_next_page:
             for status in statuses['data']:
-                w.writerow(processFacebookPageFeedStatus(status, access_token))
+            
+            	# Ensure it is a status with the expected metadata
+            	if 'reactions' in status:
+                	w.writerow(processFacebookPageFeedStatus(status, access_token))
                 
                 # output progress occasionally to make sure code is not stalling
                 num_processed += 1
