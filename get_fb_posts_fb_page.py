@@ -23,6 +23,7 @@ def request_until_succeed(url):
             time.sleep(5)
             
             print "Error for URL %s: %s" % (url, datetime.datetime.now())
+            print "Retrying."
 
     return response.read()
 
