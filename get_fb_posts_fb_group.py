@@ -38,7 +38,9 @@ def getFacebookPageFeedData(group_id, access_token, num_statuses):
     # http://stackoverflow.com/a/37239851 for Reactions parameters
     base = "https://graph.facebook.com/v2.6"
     node = "/%s/feed" % group_id 
-    fields = "/?fields=message,link,created_time,type,name,id,comments.limit(0).summary(true),shares,reactions.limit(0).summary(true),from"
+    fields = "/?fields=message,link,created_time,type,name,id," + \
+            "comments.limit(0).summary(true),shares,reactions." + \
+            "limit(0).summary(true),from"
     parameters = "&limit=%s&access_token=%s" % (num_statuses, access_token)
     url = base + node + fields + parameters
 
@@ -94,7 +96,8 @@ def processFacebookPageFeedStatus(status, access_token):
     status_published = datetime.datetime.strptime(\
             status['created_time'],'%Y-%m-%dT%H:%M:%S+0000')
     status_published = status_published + datetime.timedelta(hours=-5) # EST
-    status_published = status_published.strftime('%Y-%m-%d %H:%M:%S') # best time format for spreadsheet programs
+    # best time format for spreadsheet programs:
+    status_published = status_published.strftime('%Y-%m-%d %H:%M:%S')
 
     # Nested items require chaining dictionary keys.
 

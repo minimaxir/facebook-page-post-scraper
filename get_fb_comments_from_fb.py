@@ -84,7 +84,7 @@ def processFacebookComment(comment, status_id, parent_id = ''):
 
     # Return a tuple of all processed data
 
-    return (comment_id, status_id, parent_id, comment_message, comment_author, 
+    return (comment_id, status_id, parent_id, comment_message, comment_author,
             comment_published, comment_likes)
 
 def scrapeFacebookPageFeedComments(page_id, access_token):
@@ -123,11 +123,13 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
 
                             while has_next_subpage:
                                 for subcomment in subcomments['data']:
-                                    #print (processFacebookComment(subcomment, \
-                                    #           status['status_id'], comment['id']))
+                                    # print (processFacebookComment(
+                                        # subcomment, status['status_id'], 
+                                        # comment['id']))
                                     w.writerow(processFacebookComment(
                                             subcomment, 
-                                            status['status_id'], comment['id']))
+                                            status['status_id'], 
+                                            comment['id']))
 
                                     num_processed += 1
                                     if num_processed % 1000 == 0:

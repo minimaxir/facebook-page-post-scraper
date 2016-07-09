@@ -38,7 +38,9 @@ def getFacebookPageFeedData(page_id, access_token, num_statuses):
     # Reactions parameters
     base = "https://graph.facebook.com/v2.6"
     node = "/%s/posts" % page_id 
-    fields = "/?fields=message,link,created_time,type,name,id,comments.limit(0).summary(true),shares,reactions.limit(0).summary(true)"
+    fields = "/?fields=message,link,created_time,type,name,id," + \
+            "comments.limit(0).summary(true),shares,reactions" + \
+            ".limit(0).summary(true)"
     parameters = "&limit=%s&access_token=%s" % (num_statuses, access_token)
     url = base + node + fields + parameters
 
@@ -115,9 +117,11 @@ def processFacebookPageFeedStatus(status, access_token):
     num_likes = 0 if 'like' not in reactions else \
             reactions['like']['summary']['total_count']
 
-    # Special case: Set number of Likes to Number of reactions for pre-reaction statuses
+    # Special case: Set number of Likes to Number of reactions for pre-reaction
+    # statuses
 
-    num_likes = num_reactions if status_published < '2016-02-24 00:00:00' else num_likes
+    num_likes = num_reactions if status_published < '2016-02-24 00:00:00' \
+            else num_likes
 
     def get_num_total_reactions(reaction_type, reactions):
         if reaction_type not in reactions:
@@ -158,9 +162,11 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
 
                 # Ensure it is a status with the expected metadata
                 if 'reactions' in status:
-                    w.writerow(processFacebookPageFeedStatus(status, access_token))
+                    w.writerow(processFacebookPageFeedStatus(status,
+                        access_token))
 
-                # output progress occasionally to make sure code is not stalling
+                # output progress occasionally to make sure code is not
+                # stalling
                 num_processed += 1
                 if num_processed % 100 == 0:
                     print "%s Statuses Processed: %s" % \
