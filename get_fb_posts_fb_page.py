@@ -89,7 +89,7 @@ def getReactionsForStatuses(page_id, access_token, num_statuses, after):
     return reactions_dict
 
 
-def processFacebookPageFeedStatus(status, access_token):
+def processFacebookPageFeedStatus(status):
 
     # The status is now a Python dictionary, so for top-level items,
     # we can simply call the key.
@@ -125,7 +125,6 @@ def processFacebookPageFeedStatus(status, access_token):
         status['comments']['summary']['total_count']
     num_shares = 0 if 'shares' not in status else status['shares']['count']
 
-    # Return a tuple of all processed data
 
     return (status_id, status_message, link_name, status_type, status_link,
             status_published, num_reactions, num_comments, num_shares)
@@ -157,13 +156,10 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
 
                 # Ensure it is a status with the expected metadata
                 if 'reactions' in status:
-                    status_data = processFacebookPageFeedStatus(status,
-                                                                access_token)
+                    status_data = processFacebookPageFeedStatus(status)
                     reactions_data = reactions[status_data[0]]
                     w.writerow(status_data + reactions_data)
 
-                # output progress occasionally to make sure code is not
-                # stalling
                 num_processed += 1
                 if num_processed % 100 == 0:
                     print("{} Statuses Processed: {}".format
