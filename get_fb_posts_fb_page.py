@@ -74,9 +74,13 @@ def getReactionsForStatuses(page_id, access_token, num_statuses, after):
 
         data = json.loads(request_until_succeed(url))['data']
 
+        data_processed = set()  # set() removes rare duplicates in statuses
         for status in data:
             id = status['id']
             count = status[reaction_type]['summary']['total_count']
+            data_processed.add((id, count))
+
+        for id, count in data_processed:
             if id in reactions_dict:
                 reactions_dict[id] = reactions_dict[id] + (count,)
             else:
