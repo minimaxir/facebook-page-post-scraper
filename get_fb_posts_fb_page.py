@@ -128,7 +128,7 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
                     "num_wows", "num_hahas", "num_sads", "num_angrys"])
 
         has_next_page = True
-        num_processed = 0   # keep a count on how many we've processed
+        num_processed = 0
         scrape_starttime = datetime.datetime.now()
         after = ''
         base = "https://graph.facebook.com/v2.9"
@@ -164,7 +164,7 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
             else:
                 has_next_page = False
 
-        print("\nDone!\n%s Statuses Processed in {}".format(
+        print("\nDone!\n{} Statuses Processed in {}".format(
               (num_processed, datetime.datetime.now() - scrape_starttime)))
 
 
