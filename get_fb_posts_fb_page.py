@@ -40,44 +40,34 @@ def unicode_decode(text):
         return text.encode('utf-8')
 
 
-def getFacebookPageFeedUrl(page_id, access_token, num_statuses, after):
+def getFacebookPageFeedUrl(base_url):
 
     # Construct the URL string; see http://stackoverflow.com/a/37239851 for
     # Reactions parameters
-    base = "https://graph.facebook.com/v2.9"
-    node = "/{}/posts".format(page_id)
-    fields = "/?fields=message,link,created_time,type,name,id," + \
+    fields = "&fields=message,link,created_time,type,name,id," + \
         "comments.limit(0).summary(true),shares,reactions" + \
         ".limit(0).summary(true)"
-    parameters = "&limit={}&access_token={}".format(num_statuses, access_token)
-    after = '' if after is '' else "&after={}".format(after)
-    url = base + node + fields + parameters + after
 
-    return url
+    return base_url + fields
 
 
-def getReactionsForStatuses(page_id, access_token, num_statuses, after):
+def getReactionsForStatuses(base_url):
 
     reaction_types = ['like', 'love', 'wow', 'haha', 'sad', 'angry']
     reactions_dict = {}   # dict of {status_id: tuple<6>}
 
-    base = "https://graph.facebook.com/v2.9"
-    node = "/{}/posts".format(page_id)
-    parameters = "&limit={}&access_token={}".format(num_statuses, access_token)
-    after = '' if after is '' else "&after={}".format(after)
-
     for reaction_type in reaction_types:
-        fields = "/?fields=reactions.type({}).limit(0).summary(total_count).as({})".format(
-            reaction_type.upper(), reaction_type)
+        fields = "&fields=reactions.type({}).limit(0).summary(total_count)".format(
+            reaction_type.upper())
 
-        url = base + node + fields + parameters + after
+        url = base_url + fields
 
         data = json.loads(request_until_succeed(url))['data']
 
         data_processed = set()  # set() removes rare duplicates in statuses
         for status in data:
             id = status['id']
-            count = status[reaction_type]['summary']['total_count']
+            count = status['reactions']['summary']['total_count']
             data_processed.add((id, count))
 
         for id, count in data_processed:
@@ -125,7 +115,6 @@ def processFacebookPageFeedStatus(status):
         status['comments']['summary']['total_count']
     num_shares = 0 if 'shares' not in status else status['shares']['count']
 
-
     return (status_id, status_message, link_name, status_type, status_link,
             status_published, num_reactions, num_comments, num_shares)
 
@@ -142,15 +131,19 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
         num_processed = 0   # keep a count on how many we've processed
         scrape_starttime = datetime.datetime.now()
         after = ''
+        base = "https://graph.facebook.com/v2.9"
+        node = "/{}/posts".format(page_id)
+        parameters = "/?limit={}&access_token={}".format(100, access_token)
 
         print("Scraping {} Facebook Page: {}\n".format(page_id, scrape_starttime))
 
         while has_next_page:
+            after = '' if after is '' else "&after={}".format(after)
+            base_url = base + node + parameters + after
 
-            url = getFacebookPageFeedUrl(page_id, access_token, 100, after)
+            url = getFacebookPageFeedUrl(base_url)
             statuses = json.loads(request_until_succeed(url))
-            reactions = getReactionsForStatuses(
-                page_id, access_token, 100, after)
+            reactions = getReactionsForStatuses(base_url)
 
             for status in statuses['data']:
 
