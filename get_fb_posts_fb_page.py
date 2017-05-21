@@ -165,7 +165,7 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
                 has_next_page = False
 
         print("\nDone!\n{} Statuses Processed in {}".format(
-              (num_processed, datetime.datetime.now() - scrape_starttime)))
+              num_processed, datetime.datetime.now() - scrape_starttime))
 
 
 if __name__ == '__main__':
