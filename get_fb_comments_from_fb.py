@@ -88,17 +88,17 @@ def processFacebookComment(comment, status_id, parent_id=''):
     # so must check for existence first
 
     comment_id = comment['id']
-    comment_message = '' if 'message' not in comment else \
-        unicode_decode(comment['message'])
+    comment_message = '' if 'message' not in comment or comment['message'] \
+        is '' else unicode_decode(comment['message'])
     comment_author = unicode_decode(comment['from']['name'])
     num_reactions = 0 if 'reactions' not in comment else \
         comment['reactions']['summary']['total_count']
 
     if 'attachment' in comment:
         attachment_type = comment['attachment']['type']
-        attachment_type = "GIF" if attachment_type is "animated_image_autoplay" \
-            else attachment_type.upper()
-        attach_tag = "[[{}]]".format(attachment_type)
+        attachment_type = 'gif' if attachment_type == 'animated_image_share' \
+            else attachment_type
+        attach_tag = "[[{}]]".format(attachment_type.upper())
         comment_message = attach_tag if comment_message is '' else \
             comment_message + " " + attach_tag
 
@@ -139,21 +139,22 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
             reader = csv.DictReader(csvfile)
 
             # Uncomment below line to scrape comments for a specific status_id
-            reader = [dict(status_id='5550296508_10154352768246509')]
+            # reader = [dict(status_id='5550296508_10154352768246509')]
 
             for status in reader:
                 has_next_page = True
 
-                node = "/{}/comments".format(status['status_id'])
-                after = '' if after is '' else "&after={}".format(after)
-                base_url = base + node + parameters + after
+                while has_next_page:
 
-                url = getFacebookCommentFeedUrl(base_url)
-                # print(url)
-                comments = json.loads(request_until_succeed(url))
-                reactions = getReactionsForComments(base_url)
+                    node = "/{}/comments".format(status['status_id'])
+                    after = '' if after is '' else "&after={}".format(after)
+                    base_url = base + node + parameters + after
 
-                while has_next_page and comments is not None:
+                    url = getFacebookCommentFeedUrl(base_url)
+                    # print(url)
+                    comments = json.loads(request_until_succeed(url))
+                    reactions = getReactionsForComments(base_url)
+
                     for comment in comments['data']:
                         comment_data = processFacebookComment(
                             comment, status['status_id'])
@@ -181,8 +182,6 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                                 sub_reactions = getReactionsForComments(
                                     sub_base_url)
 
-                                # print(sub_reactions)
-
                                 for sub_comment in sub_comments['data']:
                                     sub_comment_data = processFacebookComment(
                                         sub_comment, status['status_id'], comment['id'])
@@ -193,7 +192,7 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                                         6] - sum(sub_reactions_data)
 
                                     w.writerow(sub_comment_data +
-                                               sub_reactions_data +(num_sub_special,))
+                                               sub_reactions_data + (num_sub_special,))
 
                                     num_processed += 1
                                     if num_processed % 100 == 0:
