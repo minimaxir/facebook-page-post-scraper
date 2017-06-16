@@ -11,6 +11,10 @@ app_id = "<FILL IN>"
 app_secret = "<FILL IN>"  # DO NOT SHARE WITH ANYONE!
 page_id = "cnn"
 
+# input date formatted as YYYY-MM-DD
+since_date = ""
+until_date = ""
+
 access_token = app_id + "|" + app_secret
 
 
@@ -119,7 +123,7 @@ def processFacebookPageFeedStatus(status):
             status_published, num_reactions, num_comments, num_shares)
 
 
-def scrapeFacebookPageFeedStatus(page_id, access_token):
+def scrapeFacebookPageFeedStatus(page_id, access_token, since_date, until_date):
     with open('{}_facebook_statuses.csv'.format(page_id), 'w') as file:
         w = csv.writer(file)
         w.writerow(["status_id", "status_message", "link_name", "status_type",
@@ -135,12 +139,16 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
         base = "https://graph.facebook.com/v2.9"
         node = "/{}/posts".format(page_id)
         parameters = "/?limit={}&access_token={}".format(100, access_token)
+        since = "&since={}".format(since_date) if since_date \
+            is not '' else ''
+        until = "&until={}".format(until_date) if until_date \
+            is not '' else ''
 
         print("Scraping {} Facebook Page: {}\n".format(page_id, scrape_starttime))
 
         while has_next_page:
             after = '' if after is '' else "&after={}".format(after)
-            base_url = base + node + parameters + after
+            base_url = base + node + parameters + after + since + until
 
             url = getFacebookPageFeedUrl(base_url)
             statuses = json.loads(request_until_succeed(url))
@@ -173,4 +181,4 @@ def scrapeFacebookPageFeedStatus(page_id, access_token):
 
 
 if __name__ == '__main__':
-    scrapeFacebookPageFeedStatus(page_id, access_token)
+    scrapeFacebookPageFeedStatus(page_id, access_token, since_date, until_date)

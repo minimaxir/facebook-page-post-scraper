@@ -12,6 +12,10 @@ app_id = "<FILL IN>"
 app_secret = "<FILL IN>"  # DO NOT SHARE WITH ANYONE!
 group_id = "759985267390294"
 
+# input date formatted as YYYY-MM-DD
+since_date = ""
+until_date = ""
+
 access_token = app_id + "|" + app_secret
 
 
@@ -123,7 +127,7 @@ def processFacebookPageFeedStatus(status):
             status_link, status_published, num_reactions, num_comments, num_shares)
 
 
-def scrapeFacebookPageFeedStatus(group_id, access_token):
+def scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date):
     with open('{}_facebook_statuses.csv'.format(group_id), 'w') as file:
         w = csv.writer(file)
         w.writerow(["status_id", "status_message", "status_author", "link_name",
@@ -142,6 +146,10 @@ def scrapeFacebookPageFeedStatus(group_id, access_token):
         base = "https://graph.facebook.com/v2.9"
         node = "/{}/feed".format(group_id)
         parameters = "/?limit={}&access_token={}".format(100, access_token)
+        since = "&since={}".format(since_date) if since_date \
+            is not '' else ''
+        until = "&until={}".format(until_date) if until_date \
+            is not '' else ''
 
         print("Scraping {} Facebook Group: {}\n".format(
             group_id, scrape_starttime))
@@ -149,7 +157,7 @@ def scrapeFacebookPageFeedStatus(group_id, access_token):
         while has_next_page:
             until = '' if until is '' else "&until={}".format(until)
             paging = '' if until is '' else "&__paging_token={}".format(paging)
-            base_url = base + node + parameters + until + paging
+            base_url = base + node + parameters + since + until + paging
 
             url = getFacebookPageFeedUrl(base_url)
             statuses = json.loads(request_until_succeed(url))
@@ -188,7 +196,7 @@ def scrapeFacebookPageFeedStatus(group_id, access_token):
 
 
 if __name__ == '__main__':
-    scrapeFacebookPageFeedStatus(group_id, access_token)
+    scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date)
 
 
 # The CSV can be opened in all major statistical programs. Have fun! :)
