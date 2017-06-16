@@ -129,7 +129,8 @@ def scrapeFacebookPageFeedStatus(group_id, access_token):
         w.writerow(["status_id", "status_message", "status_author", "link_name",
                     "status_type", "status_link", "status_published",
                     "num_reactions", "num_comments", "num_shares", "num_likes",
-                    "num_loves", "num_wows", "num_hahas", "num_sads", "num_angrys"])
+                    "num_loves", "num_wows", "num_hahas", "num_sads", "num_angrys",
+                    "num_special"])
 
         has_next_page = True
         num_processed = 0   # keep a count on how many we've processed
@@ -160,7 +161,10 @@ def scrapeFacebookPageFeedStatus(group_id, access_token):
                 if 'reactions' in status:
                     status_data = processFacebookPageFeedStatus(status)
                     reactions_data = reactions[status_data[0]]
-                    w.writerow(status_data + reactions_data)
+
+                    # calculate thankful/pride through algebra
+                    num_special = status_data[7] - sum(reactions_data)
+                    w.writerow(status_data + reactions_data + (num_special,))
 
                 # output progress occasionally to make sure code is not
                 # stalling

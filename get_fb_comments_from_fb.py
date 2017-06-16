@@ -123,7 +123,7 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
         w.writerow(["comment_id", "status_id", "parent_id", "comment_message",
                     "comment_author", "comment_published", "num_reactions",
                     "num_likes", "num_loves", "num_wows", "num_hahas",
-                    "num_sads", "num_angrys"])
+                    "num_sads", "num_angrys", "num_special"])
 
         num_processed = 0
         scrape_starttime = datetime.datetime.now()
@@ -155,8 +155,11 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                         comment_data = processFacebookComment(
                             comment, status['status_id'])
                         reactions_data = reactions[comment_data[0]]
-                        #print(comment_data + reactions_data)
-                        w.writerow(comment_data + reactions_data)
+
+                        # calculate thankful/pride through algebra
+                        num_special = comment_data[6] - sum(reactions_data)
+                        w.writerow(comment_data + reactions_data +
+                                   (num_special, ))
 
                         if 'comments' in comment:
                             has_next_subpage = True
@@ -182,8 +185,13 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                                         sub_comment, status['status_id'], comment['id'])
                                     sub_reactions_data = sub_reactions[
                                         sub_comment_data[0]]
+
+                                    num_sub_special = sub_comment_data[
+                                        6] - sum(sub_reactions_data)
+
                                     w.writerow(sub_comment_data +
-                                               sub_reactions_data)
+                                               sub_reactions_data +
+                                               (num_sub_special,))
 
                                     num_processed += 1
                                     if num_processed % 100 == 0:
