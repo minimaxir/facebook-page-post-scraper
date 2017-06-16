@@ -95,7 +95,10 @@ def processFacebookComment(comment, status_id, parent_id=''):
         comment['reactions']['summary']['total_count']
 
     if 'attachment' in comment:
-        attach_tag = "[[{}]]".format(comment['attachment']['type'].upper())
+        attachment_type = comment['attachment']['type']
+        attachment_type = "GIF" if attachment_type is "animated_image_autoplay" \
+            else attachment_type.upper()
+        attach_tag = "[[{}]]".format(attachment_type)
         comment_message = attach_tag if comment_message is '' else \
             comment_message + " " + attach_tag
 
@@ -143,7 +146,7 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                 base_url = base + node + parameters + after
 
                 url = getFacebookCommentFeedUrl(base_url)
-                #print(url)
+                # print(url)
                 comments = json.loads(request_until_succeed(url))
                 reactions = getReactionsForComments(base_url)
 
@@ -172,7 +175,7 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                                 sub_reactions = getReactionsForComments(
                                     sub_base_url)
 
-                                #print(sub_reactions)
+                                # print(sub_reactions)
 
                                 for sub_comment in sub_comments['data']:
                                     sub_comment_data = processFacebookComment(
