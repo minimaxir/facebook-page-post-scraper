@@ -138,6 +138,9 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
         with open('{}_facebook_statuses.csv'.format(file_id), 'r') as csvfile:
             reader = csv.DictReader(csvfile)
 
+            # Uncomment below line to scrape comments for a specific status_id
+            reader = [dict(status_id='5550296508_10154352768246509')]
+
             for status in reader:
                 has_next_page = True
 
@@ -190,8 +193,7 @@ def scrapeFacebookPageFeedComments(page_id, access_token):
                                         6] - sum(sub_reactions_data)
 
                                     w.writerow(sub_comment_data +
-                                               sub_reactions_data +
-                                               (num_sub_special,))
+                                               sub_reactions_data +(num_sub_special,))
 
                                     num_processed += 1
                                     if num_processed % 100 == 0:
