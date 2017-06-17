@@ -12,9 +12,23 @@ The purpose of the script is to gather Facebook data for semantic analysis, whic
 
 ### Scrape Posts From Public Page
 
+#### Usage
+```sh
+$ python get_fb_posts_fb_page.py -id APP_ID -secret APP_SECRET -page PAGE_ID 
+-since SINCE_DATE -until UNTIL_DATE
+```
+Note: SINCE_DATE and UNTIL_DATE are OPTIONAL Arguments.
+
 The Page data scraper is implemented as a Python 2/3 script in `get_fb_posts_fb_page.py`; fill in the App ID and App Secret of a Facebook app you control (I strongly recommend creating an app just for this purpose) and the Page ID of the Facebook Page you want to scrape at the beginning of the file. Then run the script by `cd` into the directory containing the script, then running `python get_fb_posts_fb_page.py` or `python3 get_fb_posts_fb_page.py`.
 
 ### Scrape Posts from Open Group
+
+#### Usage
+```sh
+$ python get_fb_posts_fb_group.py -id APP_ID -secret APP_SECRET -group GROUP_ID 
+-since SINCE_DATE -until UNTIL_DATE
+```
+Note: SINCE_DATE and UNTIL_DATE are OPTIONAL Arguments.
 
 To get data from an Open Group, use the `get_fb_posts_fb_group.py` script with the App ID and App Secret filled in the same way. However, the `group_id` is a *numeric ID*. For groups without a custom username, the ID will be in the address bar; for groups with custom usernames, to get the ID, do a View Source on the Group Page, search for the phrase `"entity_id"`, and use the number to the right of that field. For example, the `group_id` of [Hackathon Hackers](https://www.facebook.com/groups/hackathonhackers/) is 759985267390294.
 
@@ -22,6 +36,10 @@ To get data from an Open Group, use the `get_fb_posts_fb_group.py` script with t
 
 ### Scrape Comments From Page/Group Posts
 
+#### Usage
+```sh
+$ python get_fb_comments_from_fb.py -id APP_ID -secret APP_SECRET -file POST_ID
+```
 To scrape all the user comments from the posts, create a CSV using either of the above scripts, then run the `get_fb_comments_from_fb.py` script, specifying the Page/Group as the `file_id`. The output includes the original `status_id` where the comment is located so you can map the comment to the original Post with a `JOIN` or `VLOOKUP`, and also a `parent_id` if the comment is a reply to another comment.
 
 Keep in mind that large pages such as CNN have *millions* of comments, so be careful! (scraping throughput is approximately 87k comments/hour)
