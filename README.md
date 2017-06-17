@@ -14,8 +14,6 @@ The purpose of the script is to gather Facebook data for semantic analysis, whic
 
 The Page data scraper is implemented as a Python 2/3 script in `get_fb_posts_fb_page.py`; fill in the App ID and App Secret of a Facebook app you control (I strongly recommend creating an app just for this purpose) and the Page ID of the Facebook Page you want to scrape at the beginning of the file. Then run the script by `cd` into the directory containing the script, then running `python get_fb_posts_fb_page.py` or `python3 get_fb_posts_fb_page.py`.
 
-Example CSVs for CNN, NYTimes, and BuzzFeed data are not included in this repository due to size, but you can download [CNN data here](https://dl.dropboxusercontent.com/u/2017402/cnn_facebook_statuses.csv.zip) [2.7MB ZIP], [NYTimes data here](https://dl.dropboxusercontent.com/u/2017402/nytimes_facebook_statuses.csv.zip) [4.9MB ZIP], and [BuzzFeed data here](https://dl.dropboxusercontent.com/u/2017402/buzzfeed_facebook_statuses.csv.zip) [2.1MB ZIP].
-
 ### Scrape Posts from Open Group
 
 To get data from an Open Group, use the `get_fb_posts_fb_group.py` script with the App ID and App Secret filled in the same way. However, the `group_id` is a *numeric ID*. For groups without a custom username, the ID will be in the address bar; for groups with custom usernames, to get the ID, do a View Source on the Group Page, search for "entity_id", and use the number to the right of that field. For example, the `group_id` of [Hackathon Hackers](https://www.facebook.com/groups/hackathonhackers/) is 759985267390294.
@@ -36,9 +34,16 @@ This scraper can only scrape public Facebook data which is available to anyone, 
 
 Note that this script, and any variant of this script, *cannot* be used to scrape data from user profiles. (and the Facebook API specifically disallows this use case!)
 
+## Known Issues
+
+* UTF-16 text (CJK) sometimes fails.
+* GIFs in comments will not appear for an App access_token. (it requires a User access_token for no apparent reason).
+
 ## Maintainer
 
-* Max Woolf ([@minimaxir](http://minimaxir.com))
+Max Woolf ([@minimaxir](http://minimaxir.com))
+
+*Max's open-source projects are supported by his [Patreon](https://www.patreon.com/minimaxir). If you found this project helpful, any monetary contributions to the Patreon are appreciated and will be put to good creative use.*
 
 For more information on how the script was originally created, and some tips on how to create similar scrapers yourself, see my blog post [How to Scrape Data From Facebook Page Posts for Statistical Analysis](http://minimaxir.com/2015/07/facebook-scraper/).
 
