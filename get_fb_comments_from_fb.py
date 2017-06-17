@@ -15,7 +15,6 @@ def get_args():
     parser.add_argument('-secret',type=str,help='App Secret provided by facebook.com',required=True)
     parser.add_argument('-file',type=str,help='ID of the facebook post.',required=True)
     args = parser.parse_args()
-    args = parser.parse_args()
     file_id = args.file
     app_id = args.id + "|" + args.secret
     return app_id,file_id
