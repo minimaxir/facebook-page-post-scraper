@@ -17,7 +17,6 @@ def get_args():
     parser.add_argument('-since',type=str,help='Beginning date to scrape.',required=False)
     parser.add_argument('-until',type=str,help='Ending date to scrape.',required=False)
     args = parser.parse_args()
-    args = parser.parse_args()
     group_id = args.file
     app_id = args.id + "|" + args.secret
     date = [args.since,args.until]
