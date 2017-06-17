@@ -16,11 +16,9 @@ The Page data scraper is implemented as a Python 2/3 script in `get_fb_posts_fb_
 
 ### Scrape Posts from Open Group
 
-To get data from an Open Group, use the `get_fb_posts_fb_group.py` script with the App ID and App Secret filled in the same way. However, the `group_id` is a *numeric ID*. For groups without a custom username, the ID will be in the address bar; for groups with custom usernames, to get the ID, do a View Source on the Group Page, search for "entity_id", and use the number to the right of that field. For example, the `group_id` of [Hackathon Hackers](https://www.facebook.com/groups/hackathonhackers/) is 759985267390294.
+To get data from an Open Group, use the `get_fb_posts_fb_group.py` script with the App ID and App Secret filled in the same way. However, the `group_id` is a *numeric ID*. For groups without a custom username, the ID will be in the address bar; for groups with custom usernames, to get the ID, do a View Source on the Group Page, search for the phrase `"entity_id"`, and use the number to the right of that field. For example, the `group_id` of [Hackathon Hackers](https://www.facebook.com/groups/hackathonhackers/) is 759985267390294.
 
 ![](/examples/entity.png)
-
-You can download example data for [Hackathon Hackers here](https://dl.dropboxusercontent.com/u/2017402/759985267390294_facebook_statuses.csv.zip) [4.7MB ZIP]
 
 ### Scrape Comments From Page/Group Posts
 
