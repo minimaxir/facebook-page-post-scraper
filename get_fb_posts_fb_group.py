@@ -121,7 +121,8 @@ def processFacebookPageFeedStatus(status):
             status_link, status_published, num_reactions, num_comments, num_shares)
 
 
-def scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date):
+def scrapeFacebookPageFeedStatus(group_id, access_token, since_date,
+                                 until_date, limit):
     with open('{}_facebook_statuses.csv'.format(group_id), 'w') as file:
         w = csv.writer(file)
         w.writerow(["status_id", "status_message", "status_author", "link_name",
@@ -132,7 +133,6 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date)
 
         has_next_page = True
         num_processed = 0   # keep a count on how many we've processed
-        scrape_starttime = datetime.datetime.now()
 
         # /feed endpoint pagenates througn an `until` and `paging` parameters
         until = ''
@@ -144,9 +144,6 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date)
             is not '' else ''
         until = "&until={}".format(until_date) if until_date \
             is not '' else ''
-
-        print("Scraping {} Facebook Group: {}\n".format(
-            group_id, scrape_starttime))
 
         while has_next_page:
             until = '' if until is '' else "&until={}".format(until)
@@ -171,6 +168,8 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date)
                 # output progress occasionally to make sure code is not
                 # stalling
                 num_processed += 1
+                if num_processed == limit:
+                    return(num_processed)
                 if num_processed % 100 == 0:
                     print("{} Statuses Processed: {}".format
                           (num_processed, datetime.datetime.now()))
@@ -185,8 +184,7 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date, until_date)
             else:
                 has_next_page = False
 
-        print("\nDone!\n{} Statuses Processed in {}".format(
-              num_processed, datetime.datetime.now() - scrape_starttime))
+        return(num_processed)
 
 
 def get_args():
@@ -208,17 +206,29 @@ def get_args():
                         required=False)
     parser.add_argument('-until', type=str,
                         help='Ending date to scrape.', required=False)
+    parser.add_argument('-limit', type=int,
+                        help='Maximum number of Facebook Posts to scrape.',
+                        required=False)
     args = parser.parse_args()
     group_id = args.group
     app_id = args.id + '|' + args.secret
     dates = [args.since, args.until]
-    return (app_id, group_id, dates)
+    limit = args.limit
+    return (app_id, group_id, dates, limit)
 
 
 if __name__ == '__main__':
-    (access_token, group_id, dates) = get_args()
+    (access_token, group_id, dates, limit) = get_args()
 
     since_date = dates[0] or ''
     until_date = dates[1] or ''
-    scrapeFacebookPageFeedStatus(group_id, access_token, since_date,
-                                 until_date)
+    limit = limit or -1
+
+    scrape_starttime = datetime.datetime.now()
+    print("Scraping {} Facebook Group: {}\n".format(
+        group_id, scrape_starttime))
+    num_processed = scrapeFacebookPageFeedStatus(group_id, access_token,
+                                                 since_date, until_date, limit)
+
+    print("\nDone!\n{} Statuses Processed in {}".format(
+        num_processed, datetime.datetime.now() - scrape_starttime))
