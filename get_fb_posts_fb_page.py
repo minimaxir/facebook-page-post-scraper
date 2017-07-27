@@ -121,9 +121,9 @@ def processFacebookPageFeedStatus(status):
             status_link, status_published, num_reactions, num_comments, num_shares)
 
 
-def scrapeFacebookPageFeedStatus(group_id, access_token, since_date,
+def scrapeFacebookPageFeedStatus(page_id, access_token, since_date,
                                  until_date, limit):
-    with open('{}_facebook_statuses.csv'.format(group_id), 'w') as file:
+    with open('{}_facebook_statuses.csv'.format(page_id), 'w') as file:
         w = csv.writer(file)
         w.writerow(["status_id", "status_message", "status_author", "link_name",
                     "status_type", "status_link", "status_published",
@@ -135,10 +135,9 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date,
         num_processed = 0   # keep a count on how many we've processed
 
         # /feed endpoint pagenates througn an `until` and `paging` parameters
-        until = ''
-        paging = ''
+        after = ''
         base = "https://graph.facebook.com/v2.9"
-        node = "/{}/feed".format(group_id)
+        node = "/{}/posts".format(page_id)
         parameters = "/?limit={}&access_token={}".format(100, access_token)
         since = "&since={}".format(since_date) if since_date \
             is not '' else ''
@@ -146,9 +145,8 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date,
             is not '' else ''
 
         while has_next_page:
-            until = '' if until is '' else "&until={}".format(until)
-            paging = '' if until is '' else "&__paging_token={}".format(paging)
-            base_url = base + node + parameters + since + until + paging
+            after = '' if after is '' else "&after={}".format(after)
+            base_url = base + node + parameters + after + since + until
 
             url = getFacebookPageFeedUrl(base_url)
             statuses = json.loads(request_until_succeed(url))
@@ -176,8 +174,7 @@ def scrapeFacebookPageFeedStatus(group_id, access_token, since_date,
 
             # if there is no next page, we're done.
             if 'paging' in statuses:
-                next_url = statuses['paging']['next']
-
+                after = statuses['paging']['cursors']['after']
             else:
                 has_next_page = False
 
