@@ -2,6 +2,8 @@
 
 **UPDATE December 2017: Due to a [bug on Facebook's end](https://developers.facebook.com/bugs/1838195226492053/), using this scraper will only return a very small subset of posts (5-10% of posts) over a limited timeframe. Since Facebook now owns [CrowdTangle](http://www.crowdtangle.com), the (paid) canonical source of historical Facebook data, Facebook doesn't have an incentive to fix the linked bug.**
 
+**On December 12th, a Facebook engineer commented that they are developing a new endpoint for scraping posts chronologically. I will refactor this script once that happens. Until then, there likely will not be any PRs accepted.**
+
 ![](/examples/fb_scraper_data.png)
 
 A tool for gathering *all* the posts and comments of a Facebook Page (or Open Facebook Group) and related metadata, including post message, post links, and counts of each reaction on the post. All this data is exported as a CSV, able to be imported into any data analysis program like Excel.
